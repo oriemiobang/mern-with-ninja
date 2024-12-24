@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt')
 const validator = require('validator')
+
+
+
 const Schema  = mongoose.Schema;
 const userSchema  = new Schema({
     email : {
@@ -29,10 +32,7 @@ if(!validator.isEmail(email)){
 if(!validator.isStrongPassword(password)){
     throw new Error('Password is not strong enough')
 }
-
-    
     const exist = await this.findOne({email})
-
     if(exist){
         throw new Error('Email already in use')
     }
@@ -44,6 +44,30 @@ if(!validator.isStrongPassword(password)){
     return user
 
     
+
+}
+
+// static login method 
+
+userSchema.statics.login = async function(email, password) {
+    if(!email || !password){
+        throw new Error('All fields must be filled required')
+    }
+    const user = await this.findOne({email})
+
+    if(!user){
+        throw new Error('Incorrect email')
+    }
+
+    const match = await bcrypt.compare(password, user.password)
+    if(!match){
+        throw new Error('Incorrect password')
+    }
+
+    return user
+    
+
+
 
 }
 
